@@ -1,4 +1,5 @@
 ﻿using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
@@ -8,7 +9,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using Microsoft.Xrm.Sdk;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
 using CrmExceptionHelper = XrmToolBox.CrmExceptionHelper;
@@ -49,11 +49,12 @@ namespace MsCrmTools.AuditCenter
         #endregion Constructor
 
         #region Properties
+
+        public string HelpUrl { get { return "https://github.com/MscrmTools/MscrmTools.AuditCenter/wiki"; } }
         public string RepositoryName { get { return "MscrmTools.AuditCenter"; } }
         public string UserName { get { return "MscrmTools"; } }
-        public string HelpUrl { get { return "https://github.com/MscrmTools/MscrmTools.AuditCenter/wiki"; } }
 
-        #endregion
+        #endregion Properties
 
         #region Methods
 
@@ -91,26 +92,21 @@ namespace MsCrmTools.AuditCenter
                     continue;
                 }
 
-                string displayName = amd.DisplayName != null && amd.DisplayName.UserLocalizedLabel != null
-                    ? amd.DisplayName.UserLocalizedLabel.Label
-                    : "N/A";
+                string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
 
                 var itemAttr = new ListViewItem { Text = displayName, Tag = amd };
                 itemAttr.SubItems.Add(amd.LogicalName);
                 items.Add(itemAttr);
             }
 
-            foreach (var attributeInfo in attributeInfos.Where(ai => ai.Action == ActionState.Added 
+            foreach (var attributeInfo in attributeInfos.Where(ai => ai.Action == ActionState.Added
             && ai.Amd.EntityLogicalName == emd.LogicalName))
             {
-                    string displayName = attributeInfo.Amd.DisplayName != null &&
-                                         attributeInfo.Amd.DisplayName.UserLocalizedLabel != null
-                        ? attributeInfo.Amd.DisplayName.UserLocalizedLabel.Label
-                        : "N/A";
+                string displayName = attributeInfo.Amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
 
-                    var itemAttr = new ListViewItem { Text = displayName, Tag = attributeInfo.Amd };
-                    itemAttr.SubItems.Add(attributeInfo.Amd.LogicalName);
-                    items.Add(itemAttr);
+                var itemAttr = new ListViewItem { Text = displayName, Tag = attributeInfo.Amd };
+                itemAttr.SubItems.Add(attributeInfo.Amd.LogicalName);
+                items.Add(itemAttr);
             }
 
             if (items.Count > 0)
@@ -159,7 +155,7 @@ namespace MsCrmTools.AuditCenter
                     }
                     else
                     {
-                        var settings = (Entity) e.Result;
+                        var settings = (Entity)e.Result;
                         var isAuditEnabled = settings.GetAttributeValue<bool>("isauditenabled");
                         lblStatusStatus.Text = isAuditEnabled ? "ON" : "OFF";
                         lblStatusStatus.ForeColor = isAuditEnabled ? Color.Green : Color.Red;
@@ -180,7 +176,7 @@ namespace MsCrmTools.AuditCenter
                             {
                                 entityInfos.Add(new EntityInfo { Action = ActionState.None, Emd = emd, InitialState = true });
 
-                                var item = new ListViewItem { Text = emd.DisplayName.UserLocalizedLabel.Label, Tag = emd };
+                                var item = new ListViewItem { Text = emd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A", Tag = emd };
                                 item.SubItems.Add(emd.LogicalName);
                                 lvEntities.Items.Add(item);
                             }
@@ -243,9 +239,7 @@ namespace MsCrmTools.AuditCenter
             {
                 foreach (var amd in apForm.AttributesToAdd)
                 {
-                    string displayName = amd.DisplayName != null && amd.DisplayName.UserLocalizedLabel != null
-                        ? amd.DisplayName.UserLocalizedLabel.Label
-                        : "N/A";
+                    string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
 
                     UpdateAttributeDictionary(amd, ActionState.Added);
 
@@ -277,7 +271,7 @@ namespace MsCrmTools.AuditCenter
 
                     UpdateEntityDictionary(emd, ActionState.Added);
 
-                    var item = new ListViewItem { Text = emd.DisplayName.UserLocalizedLabel.Label, Tag = emd };
+                    var item = new ListViewItem { Text = emd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A", Tag = emd };
                     item.SubItems.Add(emd.LogicalName);
                     item.Selected = true;
                     lvEntities.Items.Add(item);

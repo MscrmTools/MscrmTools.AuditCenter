@@ -29,9 +29,7 @@ namespace MsCrmTools.AuditCenter.Forms
 
             foreach (AttributeMetadata amd in emd.Attributes.Where(a => !alreadySelectedAttributes.Contains(a.LogicalName) && a.AttributeOf == null))
             {
-                string displayName = amd.DisplayName != null && amd.DisplayName.UserLocalizedLabel != null
-                          ? amd.DisplayName.UserLocalizedLabel.Label
-                          : "N/A";
+                string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
 
                 var item = new ListViewItem { Text = displayName, Tag = amd };
                 item.SubItems.Add(amd.LogicalName);

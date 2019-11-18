@@ -40,7 +40,7 @@ namespace MsCrmTools.AuditCenter.Forms
         {
             foreach (EntityMetadata emd in emds.Where(emd => !emd.IsAuditEnabled.Value))
             {
-                var item = new ListViewItem { Text = emd.DisplayName.UserLocalizedLabel != null ? emd.DisplayName.UserLocalizedLabel.Label : "N/A", Tag = emd };
+                var item = new ListViewItem { Text = emd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A", Tag = emd };
                 item.SubItems.Add(emd.LogicalName);
                 lvEntities.Items.Add(item);
             }
