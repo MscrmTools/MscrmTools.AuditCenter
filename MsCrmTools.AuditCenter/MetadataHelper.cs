@@ -20,6 +20,13 @@ namespace MsCrmTools.AuditCenter
                 Properties = new MetadataPropertiesExpression("LogicalName", "DisplayName", "Attributes", "IsAuditEnabled", "ObjectTypeCode"),
                 AttributeQuery = new AttributeQueryExpression
                 {
+                    Criteria = new MetadataFilterExpression
+                    {
+                        Conditions =
+                        {
+                            new MetadataConditionExpression("LogicalName", MetadataConditionOperator.NotIn, new[]{"traversedpath","versionnumber"})
+                        }
+                    },
                     Properties = new MetadataPropertiesExpression("DisplayName", "LogicalName", "AttributeType", "IsAuditEnabled", "AttributeOf", "EntityLogicalName"),
                 }
             };
@@ -37,6 +44,16 @@ namespace MsCrmTools.AuditCenter
             var entityQueryExpression = new EntityQueryExpression
             {
                 Properties = new MetadataPropertiesExpression("LogicalName", "DisplayName", "Attributes", "IsAuditEnabled", "ObjectTypeCode"),
+                AttributeQuery = new AttributeQueryExpression
+                {
+                    Criteria = new MetadataFilterExpression
+                    {
+                        Conditions =
+                        {
+                            new MetadataConditionExpression("LogicalName", MetadataConditionOperator.NotIn, new[]{"traversedpath","versionnumber"})
+                        }
+                    }
+                }
             };
             var retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest
             {
