@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Metadata.Query;
 using Microsoft.Xrm.Sdk.Query;
 using System.Text;
 using System.Xml;
-using Microsoft.Xrm.Sdk.Metadata.Query;
 
 namespace MsCrmTools.AuditCenter
 {
@@ -22,6 +22,21 @@ namespace MsCrmTools.AuditCenter
                 {
                     Properties = new MetadataPropertiesExpression("DisplayName", "LogicalName", "AttributeType", "IsAuditEnabled", "AttributeOf", "EntityLogicalName"),
                 }
+            };
+            var retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest
+            {
+                Query = entityQueryExpression,
+                ClientVersionStamp = null
+            };
+
+            return ((RetrieveMetadataChangesResponse)service.Execute(retrieveMetadataChangesRequest)).EntityMetadata;
+        }
+
+        public static EntityMetadataCollection LoadEntitiesBelowv9(IOrganizationService service)
+        {
+            var entityQueryExpression = new EntityQueryExpression
+            {
+                Properties = new MetadataPropertiesExpression("LogicalName", "DisplayName", "Attributes", "IsAuditEnabled", "ObjectTypeCode"),
             };
             var retrieveMetadataChangesRequest = new RetrieveMetadataChangesRequest
             {

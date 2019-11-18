@@ -134,7 +134,9 @@ namespace MsCrmTools.AuditCenter
                 AsyncArgument = null,
                 Work = (bw, e) =>
                 {
-                    emds = MetadataHelper.LoadEntities(Service).ToList();
+                    emds = (ConnectionDetail.OrganizationMajorVersion < 9
+                        ? MetadataHelper.LoadEntitiesBelowv9(Service)
+                        : MetadataHelper.LoadEntities(Service)).ToList();
 
                     bw.ReportProgress(0, "Retrieving system audit status...");
 
