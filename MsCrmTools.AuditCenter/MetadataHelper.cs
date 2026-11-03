@@ -27,7 +27,8 @@ namespace MsCrmTools.AuditCenter
                     "PrimaryNameAttribute",
                     "OwnershipType",
                     "IsCustomEntity",
-                    "Description"),
+                    "Description",
+                    "Attributes"),
                 AttributeQuery = new AttributeQueryExpression
                 {
                     Criteria = new MetadataFilterExpression
