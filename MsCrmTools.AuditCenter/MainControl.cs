@@ -30,6 +30,7 @@ namespace MsCrmTools.AuditCenter
         private List<EntityMetadata> emds;
         private List<EntityInfo> entityInfos;
         private List<SortingConfiguration> sortingConfigurations;
+        private bool entitiesLoaded;
 
         #endregion Variables
 
@@ -66,6 +67,53 @@ namespace MsCrmTools.AuditCenter
         private void TsbConnectClick(object sender, EventArgs e)
         {
             ExecuteMethod(LoadEntities);
+        }
+
+        private void TsbExportCsvClick(object sender, EventArgs e)
+        {
+            ExportAuditedMetadata(true);
+        }
+
+        private void TsbExportExcelClick(object sender, EventArgs e)
+        {
+            ExportAuditedMetadata(false);
+        }
+
+        private void ExportAuditedMetadata(bool csv)
+        {
+            using (var dialog = new SaveFileDialog())
+            {
+                dialog.Filter = csv ? "CSV files (*.csv)|*.csv" : "Excel workbooks (*.xlsx)|*.xlsx";
+                dialog.DefaultExt = csv ? "csv" : "xlsx";
+                dialog.AddExtension = true;
+                dialog.FileName = csv ? "AuditedMetadata.csv" : "AuditedMetadata.xlsx";
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (csv)
+                    {
+                        AuditExportHelper.ExportCsv(emds, dialog.FileName);
+                    }
+                    else
+                    {
+                        AuditExportHelper.ExportExcel(emds, dialog.FileName);
+                    }
+                }
+                catch (Exception error)
+                {
+                    MessageBox.Show(
+                        this,
+                        string.Format("The audited metadata export failed: {0}", error.Message),
+                        "Export error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+            }
         }
 
         #endregion Methods
@@ -119,6 +167,9 @@ namespace MsCrmTools.AuditCenter
         {
             entityInfos = new List<EntityInfo>();
             attributeInfos = new List<AttributeInfo>();
+            entitiesLoaded = false;
+            tsbExportCsv.Enabled = false;
+            tsbExportExcel.Enabled = false;
             lvEntities.Items.Clear();
             lvAttributes.Items.Clear();
             gbEntities.Enabled = false;
@@ -174,7 +225,7 @@ namespace MsCrmTools.AuditCenter
                         {
                             lvEntities.Items.Clear();
 
-                            foreach (EntityMetadata emd in emds.Where(x => x.IsAuditEnabled.Value))
+                            foreach (EntityMetadata emd in emds.Where(x => x.IsAuditEnabled != null && x.IsAuditEnabled.Value))
                             {
                                 entityInfos.Add(new EntityInfo { Action = ActionState.None, Emd = emd, InitialState = true });
 
@@ -184,6 +235,7 @@ namespace MsCrmTools.AuditCenter
                             }
 
                             SortGroups(lvAttributes);
+                            entitiesLoaded = true;
                         }
                         catch (Exception error)
                         {
@@ -192,6 +244,8 @@ namespace MsCrmTools.AuditCenter
                         }
                     }
 
+                    tsbExportCsv.Enabled = entitiesLoaded;
+                    tsbExportExcel.Enabled = entitiesLoaded;
                     gbEntities.Enabled = true;
                     gbAttributes.Enabled = true;
                     tsbChangeSystemAuditStatus.Enabled = true;
