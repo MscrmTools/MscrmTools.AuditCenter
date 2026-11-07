@@ -74,6 +74,12 @@
     <Compile Include="Forms\AttributePicker.Designer.cs">
       <DependentUpon>AttributePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\AuditCleanupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AuditCleanupForm.Designer.cs">
+      <DependentUpon>AuditCleanupForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EntityPicker.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -100,6 +106,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AttributePicker.resx">
       <DependentUpon>AttributePicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AuditCleanupForm.resx">
+      <DependentUpon>AuditCleanupForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EntityPicker.resx">
       <DependentUpon>EntityPicker.cs</DependentUpon>
@@ -139,10 +148,13 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>echo f | xcopy /y /f $(TargetPath) $(TargetDir)Plugins\$(TargetFileName)
-echo f | xcopy /y /f "$(ProjectDir)app.config" "$(TargetDir)XrmToolBox.exe.config"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="CopyPluginToPluginsFolder" AfterTargets="Build">
+    <MakeDir Directories="$(TargetDir)Plugins" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TargetDir)Plugins" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName).config" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetFileName).config')" />
+  </Target>
+
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

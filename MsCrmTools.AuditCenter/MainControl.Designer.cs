@@ -1,4 +1,3 @@
-﻿//PR 1 — Display audit retention period in global audit settings
 namespace MsCrmTools.AuditCenter
 {
     partial class MainControl
@@ -39,6 +38,8 @@ namespace MsCrmTools.AuditCenter
             this.tsbChangeSystemAuditStatus = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbApplyChanges = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbAuditCleanup = new System.Windows.Forms.ToolStripButton();
             this.toolImageList = new System.Windows.Forms.ImageList(this.components);
             this.gbGlobalSettings = new System.Windows.Forms.GroupBox();
             this.lblStatusStatus = new System.Windows.Forms.Label();
@@ -83,7 +84,9 @@ namespace MsCrmTools.AuditCenter
             this.tsbChangeSystemAuditStatus,
             this.tsbChangeUserAccessAudit,
             this.toolStripSeparator3,
-            this.tsbApplyChanges});
+            this.tsbApplyChanges,
+            this.toolStripSeparator4,
+            this.tsbAuditCleanup});
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(911, 25);
@@ -148,6 +151,23 @@ namespace MsCrmTools.AuditCenter
             this.tsbApplyChanges.ToolTipText = "Apply changes made to entities and attributes.\r\n\r\nThis command does not change sy" +
     "stem audit status";
             this.tsbApplyChanges.Click += new System.EventHandler(this.TsbApplyChangesClick);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbAuditCleanup
+            // 
+            this.tsbAuditCleanup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.tsbAuditCleanup.Enabled = false;
+            this.tsbAuditCleanup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAuditCleanup.Name = "tsbAuditCleanup";
+            this.tsbAuditCleanup.Size = new System.Drawing.Size(105, 22);
+            this.tsbAuditCleanup.Text = "Audit cleanup";
+            this.tsbAuditCleanup.ToolTipText = "Delete audit records for selected table(s) and a changed-date range using a Bulk " +
+    "Delete job.";
+            this.tsbAuditCleanup.Click += new System.EventHandler(this.TsbAuditCleanupClick);
             // 
             // toolImageList
             // 
@@ -469,6 +489,8 @@ namespace MsCrmTools.AuditCenter
         private System.Windows.Forms.ImageList statusImageList;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripButton tsbApplyChanges;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripButton tsbAuditCleanup;
         private System.Windows.Forms.ToolStripButton tsbChangeUserAccessAudit;
         private System.Windows.Forms.Label lblUserStatus;
         private System.Windows.Forms.Label lblUserLabel;

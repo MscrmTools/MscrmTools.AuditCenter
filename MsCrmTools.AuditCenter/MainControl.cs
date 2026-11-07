@@ -213,6 +213,7 @@ namespace MsCrmTools.AuditCenter
                     gbAttributes.Enabled = true;
                     tsbChangeSystemAuditStatus.Enabled = true;
                     tsbChangeUserAccessAudit.Enabled = true;
+                    tsbAuditCleanup.Enabled = true;
                 },
                 ProgressChanged = e =>
                 {
@@ -499,6 +500,25 @@ namespace MsCrmTools.AuditCenter
         }
 
         #endregion Global Audit settings
+
+        #region Audit cleanup
+
+        private void TsbAuditCleanupClick(object sender, EventArgs e)
+        {
+            if (emds == null || emds.Count == 0)
+            {
+                MessageBox.Show(this, "Please load data first.", "Audit cleanup",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            using (var dialog = new AuditCleanupForm(Service, emds))
+            {
+                dialog.ShowDialog(this);
+            }
+        }
+
+        #endregion Audit cleanup
 
         #region Apply changes to entities and attributes
 
