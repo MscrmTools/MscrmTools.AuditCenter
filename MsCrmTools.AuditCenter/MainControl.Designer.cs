@@ -1,4 +1,3 @@
-﻿//PR 2 — Add filtered audit log deletion by table and date range
 namespace MsCrmTools.AuditCenter
 {
     partial class MainControl
@@ -64,6 +63,8 @@ namespace MsCrmTools.AuditCenter
             this.tsbChangeUserAccessAudit = new System.Windows.Forms.ToolStripButton();
             this.lblUserStatus = new System.Windows.Forms.Label();
             this.lblUserLabel = new System.Windows.Forms.Label();
+            this.lblRetentionStatus = new System.Windows.Forms.Label();
+            this.lblRetentionLabel = new System.Windows.Forms.Label();
             this.toolStripMenu.SuspendLayout();
             this.gbGlobalSettings.SuspendLayout();
             this.gbEntitiesAndAttributes.SuspendLayout();
@@ -178,13 +179,15 @@ namespace MsCrmTools.AuditCenter
             // 
             this.gbGlobalSettings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbGlobalSettings.Controls.Add(this.lblRetentionStatus);
+            this.gbGlobalSettings.Controls.Add(this.lblRetentionLabel);
             this.gbGlobalSettings.Controls.Add(this.lblUserStatus);
             this.gbGlobalSettings.Controls.Add(this.lblUserLabel);
             this.gbGlobalSettings.Controls.Add(this.lblStatusStatus);
             this.gbGlobalSettings.Controls.Add(this.lblStatusLabel);
             this.gbGlobalSettings.Location = new System.Drawing.Point(3, 28);
             this.gbGlobalSettings.Name = "gbGlobalSettings";
-            this.gbGlobalSettings.Size = new System.Drawing.Size(905, 52);
+            this.gbGlobalSettings.Size = new System.Drawing.Size(905, 82);
             this.gbGlobalSettings.TabIndex = 3;
             this.gbGlobalSettings.TabStop = false;
             this.gbGlobalSettings.Text = "Global audit settings";
@@ -217,9 +220,9 @@ namespace MsCrmTools.AuditCenter
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbEntitiesAndAttributes.Controls.Add(this.gbAttributes);
             this.gbEntitiesAndAttributes.Controls.Add(this.gbEntities);
-            this.gbEntitiesAndAttributes.Location = new System.Drawing.Point(3, 86);
+            this.gbEntitiesAndAttributes.Location = new System.Drawing.Point(3, 116);
             this.gbEntitiesAndAttributes.Name = "gbEntitiesAndAttributes";
-            this.gbEntitiesAndAttributes.Size = new System.Drawing.Size(905, 511);
+            this.gbEntitiesAndAttributes.Size = new System.Drawing.Size(905, 481);
             this.gbEntitiesAndAttributes.TabIndex = 4;
             this.gbEntitiesAndAttributes.TabStop = false;
             this.gbEntitiesAndAttributes.Text = "Entities and attributes to audit";
@@ -408,6 +411,27 @@ namespace MsCrmTools.AuditCenter
             this.lblUserLabel.TabIndex = 2;
             this.lblUserLabel.Text = "User Access audit is currently";
             // 
+            // lblRetentionLabel
+            // 
+            this.lblRetentionLabel.AutoSize = true;
+            this.lblRetentionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRetentionLabel.Location = new System.Drawing.Point(6, 46);
+            this.lblRetentionLabel.Name = "lblRetentionLabel";
+            this.lblRetentionLabel.Size = new System.Drawing.Size(211, 24);
+            this.lblRetentionLabel.TabIndex = 4;
+            this.lblRetentionLabel.Text = "Audit retention period is";
+            // 
+            // lblRetentionStatus
+            // 
+            this.lblRetentionStatus.AutoSize = true;
+            this.lblRetentionStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRetentionStatus.ForeColor = System.Drawing.Color.Black;
+            this.lblRetentionStatus.Location = new System.Drawing.Point(223, 46);
+            this.lblRetentionStatus.Name = "lblRetentionStatus";
+            this.lblRetentionStatus.Size = new System.Drawing.Size(42, 24);
+            this.lblRetentionStatus.TabIndex = 5;
+            this.lblRetentionStatus.Text = "N/A";
+            // 
             // MainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -470,5 +494,7 @@ namespace MsCrmTools.AuditCenter
         private System.Windows.Forms.ToolStripButton tsbChangeUserAccessAudit;
         private System.Windows.Forms.Label lblUserStatus;
         private System.Windows.Forms.Label lblUserLabel;
+        private System.Windows.Forms.Label lblRetentionStatus;
+        private System.Windows.Forms.Label lblRetentionLabel;
     }
 }
