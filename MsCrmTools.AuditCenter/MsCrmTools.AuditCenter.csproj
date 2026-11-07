@@ -148,12 +148,14 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
   <Target Name="CopyPluginToPluginsFolder" AfterTargets="Build">
     <MakeDir Directories="$(TargetDir)Plugins" />
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TargetDir)Plugins" />
     <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
     <Copy SourceFiles="$(TargetDir)$(TargetFileName).config" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetFileName).config')" />
   </Target>
+
 
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

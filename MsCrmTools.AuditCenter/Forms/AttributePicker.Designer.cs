@@ -38,6 +38,7 @@
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCheckAttrOnForms = new System.Windows.Forms.Button();
             this.btnCheck = new System.Windows.Forms.Button();
+            this.columnHeaderTable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,7 +50,8 @@
             this.lvAttributes.CheckBoxes = true;
             this.lvAttributes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader4,
-            this.columnHeader7});
+            this.columnHeader7,
+            this.columnHeaderTable});
             this.lvAttributes.FullRowSelect = true;
             this.lvAttributes.HideSelection = false;
             this.lvAttributes.Location = new System.Drawing.Point(12, 95);
@@ -70,6 +72,11 @@
             // 
             this.columnHeader7.Text = "Schema name";
             this.columnHeader7.Width = 200;
+            // 
+            // columnHeaderTable
+            // 
+            this.columnHeaderTable.Text = "Table";
+            this.columnHeaderTable.Width = 160;
             // 
             // panel1
             // 
@@ -177,6 +184,7 @@
         private System.Windows.Forms.ListView lvAttributes;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeaderTable;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOk;

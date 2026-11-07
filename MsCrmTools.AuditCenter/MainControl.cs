@@ -30,6 +30,10 @@ namespace MsCrmTools.AuditCenter
         private List<AttributeInfo> attributeInfos;
         private List<EntityMetadata> emds;
         private List<EntityInfo> entityInfos;
+        private bool isRefreshingAttributes;
+        private bool isRefreshingEntitySelection;
+        private readonly HashSet<string> selectedAttributeKeys = new HashSet<string>();
+        private readonly Timer entitySelectionTimer = new Timer { Interval = 200 };
         private List<SortingConfiguration> sortingConfigurations;
 
         #endregion Variables
@@ -45,6 +49,16 @@ namespace MsCrmTools.AuditCenter
             entityInfos = new List<EntityInfo>();
             attributeInfos = new List<AttributeInfo>();
             sortingConfigurations = new List<SortingConfiguration>();
+
+            lvAttributes.ItemSelectionChanged += LvAttributesItemSelectionChanged;
+
+            // Selecting several tables raises one event per row: the attributes list is
+            // rebuilt only once, when the selection has settled
+            entitySelectionTimer.Tick += (s, e) =>
+            {
+                entitySelectionTimer.Stop();
+                RefreshAttributesList();
+            };
         }
 
         #endregion Constructor
@@ -73,12 +87,24 @@ namespace MsCrmTools.AuditCenter
 
         #region Load Entities
 
-        private void AddEntityAttributesToList(EntityMetadata emd)
+        private static string GetAttributeKey(AttributeMetadata amd)
         {
-            lvAttributes.Items.Clear();
+            return string.Concat(amd.EntityLogicalName, ".", amd.LogicalName);
+        }
 
-            List<ListViewItem> items = new List<ListViewItem>();
+        private ListViewItem CreateAttributeItem(AttributeMetadata amd)
+        {
+            string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
 
+            var itemAttr = new ListViewItem { Text = displayName, Tag = amd };
+            itemAttr.SubItems.Add(amd.LogicalName);
+            itemAttr.SubItems.Add(amd.EntityLogicalName);
+
+            return itemAttr;
+        }
+
+        private void BuildAttributeItems(EntityMetadata emd, List<ListViewItem> items)
+        {
             foreach (AttributeMetadata amd in emd.Attributes.Where(a => a.IsAuditEnabled != null
                                                                         && a.IsAuditEnabled.Value
                                                                         && a.AttributeOf == null))
@@ -93,33 +119,196 @@ namespace MsCrmTools.AuditCenter
                     continue;
                 }
 
-                string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
-
-                var itemAttr = new ListViewItem { Text = displayName, Tag = amd };
-                itemAttr.SubItems.Add(amd.LogicalName);
-                items.Add(itemAttr);
+                items.Add(CreateAttributeItem(amd));
             }
 
             foreach (var attributeInfo in attributeInfos.Where(ai => ai.Action == ActionState.Added
             && ai.Amd.EntityLogicalName == emd.LogicalName))
             {
-                string displayName = attributeInfo.Amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
+                items.Add(CreateAttributeItem(attributeInfo.Amd));
+            }
+        }
 
-                var itemAttr = new ListViewItem { Text = displayName, Tag = attributeInfo.Amd };
-                itemAttr.SubItems.Add(attributeInfo.Amd.LogicalName);
-                items.Add(itemAttr);
+        /// <summary>
+        /// Displays audited attributes of the provided entities, restoring the selection
+        /// previously made by the user, so that attributes stay selected when navigating
+        /// from one entity to another
+        /// </summary>
+        private void DisplayAttributes(List<EntityMetadata> entities)
+        {
+            var items = new List<ListViewItem>();
+
+            foreach (var emd in entities)
+            {
+                BuildAttributeItems(emd, items);
+            }
+
+            items = items.Where(i =>
+            {
+                var amd = (AttributeMetadata)i.Tag;
+
+                if (tsbShowSelectedOnly.Checked && !selectedAttributeKeys.Contains(GetAttributeKey(amd)))
+                {
+                    return false;
+                }
+
+                return MatchesFilter(amd);
+            }).ToList();
+
+            isRefreshingAttributes = true;
+
+            lvAttributes.BeginUpdate();
+            lvAttributes.Items.Clear();
+            lvAttributes.Groups.Clear();
+
+            var displayedEntities = items.Select(i => ((AttributeMetadata)i.Tag).EntityLogicalName).Distinct().ToList();
+            var useGroups = displayedEntities.Count > 1;
+            lvAttributes.ShowGroups = useGroups;
+
+            if (useGroups)
+            {
+                foreach (var emd in entities.Where(emd => displayedEntities.Contains(emd.LogicalName)))
+                {
+                    lvAttributes.Groups.Add(new ListViewGroup(emd.LogicalName,
+                        string.Format("{0} ({1})", emd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A", emd.LogicalName)));
+                }
+
+                foreach (var item in items)
+                {
+                    item.Group = lvAttributes.Groups[((AttributeMetadata)item.Tag).EntityLogicalName];
+                }
+            }
+
+            foreach (var item in items)
+            {
+                item.Selected = selectedAttributeKeys.Contains(GetAttributeKey((AttributeMetadata)item.Tag));
             }
 
             if (items.Count > 0)
             {
                 lvAttributes.Items.AddRange(items.ToArray());
             }
+
+            lvAttributes.EndUpdate();
+
+            isRefreshingAttributes = false;
+
+            gbAttributes.Text = string.Format("Attributes ({0} displayed - {1} selected)", items.Count, selectedAttributeKeys.Count);
+            RefreshSorting(lvAttributes);
+
+            if (useGroups)
+            {
+                SortGroups(lvAttributes);
+            }
+        }
+
+        private void RefreshAttributesList()
+        {
+            if (tsbShowSelectedOnly.Checked)
+            {
+                // Selected attributes are shown whatever the table they belong to,
+                // so that selections made across successive clicks remain visible
+                DisplayAttributes(lvEntities.Items.Cast<ListViewItem>().Select(i => (EntityMetadata)i.Tag).ToList());
+            }
+            else
+            {
+                DisplayAttributes(lvEntities.SelectedItems.Cast<ListViewItem>().Select(i => (EntityMetadata)i.Tag).ToList());
+            }
+        }
+
+        /// <summary>
+        /// Indicates whether an attribute matches the current filter. Terms are separated
+        /// by space, comma or semicolon and are searched in the attribute display name,
+        /// the attribute logical name and the table logical name
+        /// </summary>
+        private bool MatchesFilter(AttributeMetadata amd)
+        {
+            var terms = tstbFilter.Text.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (terms.Length == 0)
+            {
+                return true;
+            }
+
+            var displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
+
+            return terms.Any(term =>
+                displayName.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0
+                || amd.LogicalName.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0
+                || amd.EntityLogicalName.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0);
+        }
+
+        private void TstbFilterTextChanged(object sender, EventArgs e)
+        {
+            RefreshAttributesList();
+        }
+
+        private void TsbShowSelectedOnlyClick(object sender, EventArgs e)
+        {
+            RefreshAttributesList();
+        }
+
+        private void TsbSelectAllAttributesClick(object sender, EventArgs e)
+        {
+            var selectAll = lvAttributes.Items.Cast<ListViewItem>().Any(i => !i.Selected);
+
+            lvAttributes.BeginUpdate();
+            foreach (ListViewItem item in lvAttributes.Items)
+            {
+                item.Selected = selectAll;
+            }
+            lvAttributes.EndUpdate();
+
+            UpdateAttributesCaption();
+        }
+
+        private void TsbSelectAllTablesClick(object sender, EventArgs e)
+        {
+            var selectAll = lvEntities.Items.Cast<ListViewItem>().Any(i => !i.Selected);
+
+            isRefreshingEntitySelection = true;
+            lvEntities.BeginUpdate();
+            foreach (ListViewItem item in lvEntities.Items)
+            {
+                item.Selected = selectAll;
+            }
+            lvEntities.EndUpdate();
+            isRefreshingEntitySelection = false;
+
+            RefreshAttributesList();
+        }
+
+        private void LvAttributesItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            if (isRefreshingAttributes)
+            {
+                return;
+            }
+
+            var key = GetAttributeKey((AttributeMetadata)e.Item.Tag);
+
+            if (e.IsSelected)
+            {
+                selectedAttributeKeys.Add(key);
+            }
+            else
+            {
+                selectedAttributeKeys.Remove(key);
+            }
+
+            UpdateAttributesCaption();
+        }
+
+        private void UpdateAttributesCaption()
+        {
+            gbAttributes.Text = string.Format("Attributes ({0} displayed - {1} selected)",
+                lvAttributes.Items.Count, selectedAttributeKeys.Count);
         }
 
         private void LoadEntities()
         {
             entityInfos = new List<EntityInfo>();
             attributeInfos = new List<AttributeInfo>();
+            selectedAttributeKeys.Clear();
             lvEntities.Items.Clear();
             lvAttributes.Items.Clear();
             gbEntities.Enabled = false;
@@ -201,6 +390,7 @@ namespace MsCrmTools.AuditCenter
                             }
 
                             SortGroups(lvAttributes);
+                            RefreshAttributesList();
                         }
                         catch (Exception error)
                         {
@@ -228,13 +418,13 @@ namespace MsCrmTools.AuditCenter
 
         private void lvEntities_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var list = (ListView)sender;
-            if (list.SelectedItems.Count == 1)
+            if (isRefreshingEntitySelection)
             {
-                var emd = (EntityMetadata)list.SelectedItems[0].Tag;
-
-                AddEntityAttributesToList(emd);
+                return;
             }
+
+            entitySelectionTimer.Stop();
+            entitySelectionTimer.Start();
         }
 
         #endregion Entity selection
@@ -243,32 +433,28 @@ namespace MsCrmTools.AuditCenter
 
         private void PbAddAttributeClick(object sender, EventArgs e)
         {
-            if (lvEntities.SelectedItems.Count != 1)
+            var targetEmds = lvEntities.SelectedItems.Cast<ListViewItem>().Select(i => (EntityMetadata)i.Tag).ToList();
+
+            if (targetEmds.Count == 0)
             {
-                MessageBox.Show(this, "Please select one entity to add attributes!", "Warning", MessageBoxButtons.OK,
+                MessageBox.Show(this, "Please select at least one entity to add attributes!", "Warning", MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
                 return;
             }
 
-            var emd = (EntityMetadata)lvEntities.SelectedItems[0].Tag;
+            var alreadyAudited = attributeInfos.Where(ai => ai.Action != ActionState.Removed)
+                                               .Select(ai => GetAttributeKey(ai.Amd))
+                                               .ToList();
 
-            var list = lvAttributes.Items.Cast<ListViewItem>().Select(i => i.SubItems[1].Text);
-
-            var apForm = new AttributePicker(emd, list, Service);
+            var apForm = new AttributePicker(targetEmds, alreadyAudited, Service);
             if (apForm.ShowDialog(this) == DialogResult.OK)
             {
                 foreach (var amd in apForm.AttributesToAdd)
                 {
-                    string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
-
                     UpdateAttributeDictionary(amd, ActionState.Added);
-
-                    var item = new ListViewItem { Text = displayName, Tag = amd };
-                    item.SubItems.Add(amd.LogicalName);
-                    lvAttributes.Items.Add(item);
                 }
 
-                RefreshSorting(lvAttributes);
+                RefreshAttributesList();
             }
         }
 
@@ -295,22 +481,20 @@ namespace MsCrmTools.AuditCenter
                     item.SubItems.Add(emd.LogicalName);
                     item.Selected = true;
                     lvEntities.Items.Add(item);
-
-                    // AddEntityAttributesToList(emd);
-
-                    SortGroups(lvAttributes);
                 }
 
                 RefreshSorting(lvEntities);
+                RefreshAttributesList();
             }
         }
 
         private void PbRemoveAttributeClick(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in lvAttributes.SelectedItems)
+            foreach (ListViewItem item in lvAttributes.SelectedItems.Cast<ListViewItem>().ToList())
             {
                 var amd = (AttributeMetadata)item.Tag;
                 UpdateAttributeDictionary(amd, ActionState.Removed);
+                selectedAttributeKeys.Remove(GetAttributeKey(amd));
                 lvAttributes.Items.Remove(item);
             }
 
@@ -319,7 +503,7 @@ namespace MsCrmTools.AuditCenter
 
         private void PbRemoveEntityClick(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in lvEntities.SelectedItems)
+            foreach (ListViewItem item in lvEntities.SelectedItems.Cast<ListViewItem>().ToList())
             {
                 var emd = (EntityMetadata)item.Tag;
 
@@ -330,8 +514,10 @@ namespace MsCrmTools.AuditCenter
                 foreach (
                     ListViewItem attrItem in
                         lvAttributes.Items.Cast<ListViewItem>()
-                            .Where(i => ((AttributeMetadata)i.Tag).EntityLogicalName == emd.LogicalName))
+                            .Where(i => ((AttributeMetadata)i.Tag).EntityLogicalName == emd.LogicalName)
+                            .ToList())
                 {
+                    selectedAttributeKeys.Remove(GetAttributeKey((AttributeMetadata)attrItem.Tag));
                     lvAttributes.Items.Remove(attrItem);
                 }
             }

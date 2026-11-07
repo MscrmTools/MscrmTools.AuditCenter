@@ -12,12 +12,18 @@ namespace MsCrmTools.AuditCenter.Forms
     {
         public List<AttributeMetadata> AttributesToAdd;
         private readonly IEnumerable<string> alreadySelectedAttributes;
-        private readonly EntityMetadata emd;
+        private readonly List<EntityMetadata> emds;
         private readonly IOrganizationService service;
 
-        public AttributePicker(EntityMetadata emd, IEnumerable<string> alreadySelectedAttributes, IOrganizationService service)
+        /// <summary>
+        /// Initializes a new instance of <see cref="AttributePicker"/> for one or more tables
+        /// </summary>
+        /// <param name="emds">Tables whose attributes can be enabled for audit</param>
+        /// <param name="alreadySelectedAttributes">Keys, formatted as 'tableLogicalName.attributeLogicalName', of attributes already audited</param>
+        /// <param name="service">Organization service</param>
+        public AttributePicker(IEnumerable<EntityMetadata> emds, IEnumerable<string> alreadySelectedAttributes, IOrganizationService service)
         {
-            this.emd = emd;
+            this.emds = emds.ToList();
             this.alreadySelectedAttributes = alreadySelectedAttributes;
             this.service = service;
             InitializeComponent();
@@ -25,16 +31,39 @@ namespace MsCrmTools.AuditCenter.Forms
 
         private void AttributePickerLoad(object sender, EventArgs e)
         {
-            XmlDocument allFormsDoc = MetadataHelper.RetrieveEntityForms(emd.LogicalName, service);
+            var useGroups = emds.Count > 1;
+            lvAttributes.ShowGroups = useGroups;
 
-            foreach (AttributeMetadata amd in emd.Attributes.Where(a => !alreadySelectedAttributes.Contains(a.LogicalName) && a.AttributeOf == null))
+            foreach (var emd in emds)
             {
-                string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
+                XmlDocument allFormsDoc = MetadataHelper.RetrieveEntityForms(emd.LogicalName, service);
 
-                var item = new ListViewItem { Text = displayName, Tag = amd };
-                item.SubItems.Add(amd.LogicalName);
-                item.SubItems.Add((allFormsDoc.SelectSingleNode("//control[@datafieldname='" + amd.LogicalName + "']") != null).ToString());
-                lvAttributes.Items.Add(item);
+                ListViewGroup group = null;
+                if (useGroups)
+                {
+                    group = new ListViewGroup(emd.LogicalName,
+                        string.Format("{0} ({1})", emd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A", emd.LogicalName));
+                    lvAttributes.Groups.Add(group);
+                }
+
+                foreach (AttributeMetadata amd in emd.Attributes.Where(a =>
+                    !alreadySelectedAttributes.Contains(string.Concat(emd.LogicalName, ".", a.LogicalName))
+                    && a.AttributeOf == null))
+                {
+                    string displayName = amd.DisplayName?.UserLocalizedLabel?.Label ?? "N/A";
+
+                    var item = new ListViewItem { Text = displayName, Tag = amd };
+                    item.SubItems.Add(amd.LogicalName);
+                    item.SubItems.Add(emd.LogicalName);
+                    item.SubItems.Add((allFormsDoc.SelectSingleNode("//control[@datafieldname='" + amd.LogicalName + "']") != null).ToString());
+
+                    if (group != null)
+                    {
+                        item.Group = group;
+                    }
+
+                    lvAttributes.Items.Add(item);
+                }
             }
         }
 
@@ -48,7 +77,7 @@ namespace MsCrmTools.AuditCenter.Forms
         {
             foreach (ListViewItem item in lvAttributes.Items)
             {
-                item.Checked = item.SubItems[2].Text.ToLower() == "true";
+                item.Checked = item.SubItems[3].Text.ToLower() == "true";
             }
         }
 
