@@ -41,6 +41,9 @@ namespace MsCrmTools.AuditCenter
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbChangeSystemAuditStatus = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbExportCsv = new System.Windows.Forms.ToolStripButton();
+            this.tsbExportExcel = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbApplyChanges = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbAuditCleanup = new System.Windows.Forms.ToolStripButton();
@@ -97,9 +100,11 @@ namespace MsCrmTools.AuditCenter
             this.tsbChangeSystemAuditStatus,
             this.tsbChangeUserAccessAudit,
             this.toolStripSeparator3,
-            this.tsbApplyChanges,
+            this.tsbExportCsv,
+            this.tsbExportExcel,
             this.toolStripSeparator4,
-            this.tsbAuditCleanup});
+            this.tsbApplyChanges});
+
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(911, 25);
@@ -152,6 +157,29 @@ namespace MsCrmTools.AuditCenter
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            //
+            // tsbExportCsv
+            //
+            this.tsbExportCsv.Enabled = false;
+            this.tsbExportCsv.Name = "tsbExportCsv";
+            this.tsbExportCsv.Size = new System.Drawing.Size(69, 22);
+            this.tsbExportCsv.Text = "Export CSV";
+            this.tsbExportCsv.ToolTipText = "Export audited tables and columns to a UTF-8 CSV file";
+            this.tsbExportCsv.Click += new System.EventHandler(this.TsbExportCsvClick);
+            //
+            // tsbExportExcel
+            //
+            this.tsbExportExcel.Enabled = false;
+            this.tsbExportExcel.Name = "tsbExportExcel";
+            this.tsbExportExcel.Size = new System.Drawing.Size(82, 22);
+            this.tsbExportExcel.Text = "Export Excel";
+            this.tsbExportExcel.ToolTipText = "Export audited tables and columns to an Excel workbook";
+            this.tsbExportExcel.Click += new System.EventHandler(this.TsbExportExcelClick);
+            //
+            // toolStripSeparator4
+            //
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
             // 
             // tsbApplyChanges
             // 
@@ -586,6 +614,9 @@ namespace MsCrmTools.AuditCenter
         private System.Windows.Forms.ToolStripButton btnRemoveEntity;
         private System.Windows.Forms.ImageList statusImageList;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton tsbExportCsv;
+        private System.Windows.Forms.ToolStripButton tsbExportExcel;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton tsbApplyChanges;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton tsbAuditCleanup;
