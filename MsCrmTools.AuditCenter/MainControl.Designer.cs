@@ -1,4 +1,4 @@
-﻿namespace MsCrmTools.AuditCenter
+namespace MsCrmTools.AuditCenter
 {
     partial class MainControl
     {
@@ -16,6 +16,10 @@
             if (disposing && (components != null))
             {
                 components.Dispose();
+            }
+            if (disposing && (entitySelectionTimer != null))
+            {
+                entitySelectionTimer.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -41,6 +45,8 @@
             this.tsbExportExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbApplyChanges = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbAuditCleanup = new System.Windows.Forms.ToolStripButton();
             this.toolImageList = new System.Windows.Forms.ImageList(this.components);
             this.gbGlobalSettings = new System.Windows.Forms.GroupBox();
             this.lblStatusStatus = new System.Windows.Forms.Label();
@@ -50,13 +56,21 @@
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.btnAddAttribute = new System.Windows.Forms.ToolStripButton();
             this.btnRemoveAttribute = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip3 = new System.Windows.Forms.ToolStrip();
+            this.tsbSelectAllAttributes = new System.Windows.Forms.ToolStripButton();
+            this.tsbShowSelectedOnly = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.tslFilter = new System.Windows.Forms.ToolStripLabel();
+            this.tstbFilter = new System.Windows.Forms.ToolStripTextBox();
             this.lvAttributes = new System.Windows.Forms.ListView();
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderEntity = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.gbEntities = new System.Windows.Forms.GroupBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnAddEntity = new System.Windows.Forms.ToolStripButton();
             this.btnRemoveEntity = new System.Windows.Forms.ToolStripButton();
+            this.tsbSelectAllTables = new System.Windows.Forms.ToolStripButton();
             this.lvEntities = new System.Windows.Forms.ListView();
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -64,11 +78,14 @@
             this.tsbChangeUserAccessAudit = new System.Windows.Forms.ToolStripButton();
             this.lblUserStatus = new System.Windows.Forms.Label();
             this.lblUserLabel = new System.Windows.Forms.Label();
+            this.lblRetentionStatus = new System.Windows.Forms.Label();
+            this.lblRetentionLabel = new System.Windows.Forms.Label();
             this.toolStripMenu.SuspendLayout();
             this.gbGlobalSettings.SuspendLayout();
             this.gbEntitiesAndAttributes.SuspendLayout();
             this.gbAttributes.SuspendLayout();
             this.toolStrip2.SuspendLayout();
+            this.toolStrip3.SuspendLayout();
             this.gbEntities.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -87,6 +104,7 @@
             this.tsbExportExcel,
             this.toolStripSeparator4,
             this.tsbApplyChanges});
+
             this.toolStripMenu.Location = new System.Drawing.Point(0, 0);
             this.toolStripMenu.Name = "toolStripMenu";
             this.toolStripMenu.Size = new System.Drawing.Size(911, 25);
@@ -170,10 +188,27 @@
             this.tsbApplyChanges.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbApplyChanges.Name = "tsbApplyChanges";
             this.tsbApplyChanges.Size = new System.Drawing.Size(105, 22);
-            this.tsbApplyChanges.Text = "Apply changes";
+            this.tsbApplyChanges.Text = "Save && Publish";
             this.tsbApplyChanges.ToolTipText = "Apply changes made to entities and attributes.\r\n\r\nThis command does not change sy" +
     "stem audit status";
             this.tsbApplyChanges.Click += new System.EventHandler(this.TsbApplyChangesClick);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbAuditCleanup
+            // 
+            this.tsbAuditCleanup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.tsbAuditCleanup.Enabled = false;
+            this.tsbAuditCleanup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAuditCleanup.Name = "tsbAuditCleanup";
+            this.tsbAuditCleanup.Size = new System.Drawing.Size(105, 22);
+            this.tsbAuditCleanup.Text = "Audit cleanup";
+            this.tsbAuditCleanup.ToolTipText = "Delete audit records for selected table(s) and a changed-date range using a Bulk " +
+    "Delete job.";
+            this.tsbAuditCleanup.Click += new System.EventHandler(this.TsbAuditCleanupClick);
             // 
             // toolImageList
             // 
@@ -185,13 +220,15 @@
             // 
             this.gbGlobalSettings.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.gbGlobalSettings.Controls.Add(this.lblRetentionStatus);
+            this.gbGlobalSettings.Controls.Add(this.lblRetentionLabel);
             this.gbGlobalSettings.Controls.Add(this.lblUserStatus);
             this.gbGlobalSettings.Controls.Add(this.lblUserLabel);
             this.gbGlobalSettings.Controls.Add(this.lblStatusStatus);
             this.gbGlobalSettings.Controls.Add(this.lblStatusLabel);
             this.gbGlobalSettings.Location = new System.Drawing.Point(3, 28);
             this.gbGlobalSettings.Name = "gbGlobalSettings";
-            this.gbGlobalSettings.Size = new System.Drawing.Size(905, 52);
+            this.gbGlobalSettings.Size = new System.Drawing.Size(905, 82);
             this.gbGlobalSettings.TabIndex = 3;
             this.gbGlobalSettings.TabStop = false;
             this.gbGlobalSettings.Text = "Global audit settings";
@@ -224,9 +261,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbEntitiesAndAttributes.Controls.Add(this.gbAttributes);
             this.gbEntitiesAndAttributes.Controls.Add(this.gbEntities);
-            this.gbEntitiesAndAttributes.Location = new System.Drawing.Point(3, 86);
+            this.gbEntitiesAndAttributes.Location = new System.Drawing.Point(3, 116);
             this.gbEntitiesAndAttributes.Name = "gbEntitiesAndAttributes";
-            this.gbEntitiesAndAttributes.Size = new System.Drawing.Size(905, 511);
+            this.gbEntitiesAndAttributes.Size = new System.Drawing.Size(905, 481);
             this.gbEntitiesAndAttributes.TabIndex = 4;
             this.gbEntitiesAndAttributes.TabStop = false;
             this.gbEntitiesAndAttributes.Text = "Entities and attributes to audit";
@@ -237,11 +274,12 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.gbAttributes.Controls.Add(this.toolStrip2);
+            this.gbAttributes.Controls.Add(this.toolStrip3);
             this.gbAttributes.Controls.Add(this.lvAttributes);
             this.gbAttributes.Enabled = false;
-            this.gbAttributes.Location = new System.Drawing.Point(342, 19);
+            this.gbAttributes.Location = new System.Drawing.Point(406, 19);
             this.gbAttributes.Name = "gbAttributes";
-            this.gbAttributes.Size = new System.Drawing.Size(557, 486);
+            this.gbAttributes.Size = new System.Drawing.Size(493, 486);
             this.gbAttributes.TabIndex = 90;
             this.gbAttributes.TabStop = false;
             this.gbAttributes.Text = "Attributes";
@@ -253,7 +291,7 @@
             this.btnRemoveAttribute});
             this.toolStrip2.Location = new System.Drawing.Point(3, 16);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(551, 25);
+            this.toolStrip2.Size = new System.Drawing.Size(487, 25);
             this.toolStrip2.TabIndex = 3;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -275,6 +313,62 @@
             this.btnRemoveAttribute.Text = "Remove selected attribute(s)";
             this.btnRemoveAttribute.Click += new System.EventHandler(this.PbRemoveAttributeClick);
             // 
+            // toolStrip3
+            // 
+            this.toolStrip3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.toolStrip3.Dock = System.Windows.Forms.DockStyle.None;
+            this.toolStrip3.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.toolStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsbSelectAllAttributes,
+            this.tsbShowSelectedOnly,
+            this.toolStripSeparator4,
+            this.tslFilter,
+            this.tstbFilter});
+            this.toolStrip3.Location = new System.Drawing.Point(6, 44);
+            this.toolStrip3.Name = "toolStrip3";
+            this.toolStrip3.Size = new System.Drawing.Size(481, 25);
+            this.toolStrip3.TabIndex = 4;
+            // 
+            // tsbSelectAllAttributes
+            // 
+            this.tsbSelectAllAttributes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbSelectAllAttributes.Name = "tsbSelectAllAttributes";
+            this.tsbSelectAllAttributes.Size = new System.Drawing.Size(120, 22);
+            this.tsbSelectAllAttributes.Text = "Select All Attributes";
+            this.tsbSelectAllAttributes.ToolTipText = "Selects every attribute currently displayed. Click again to clear the selection.";
+            this.tsbSelectAllAttributes.Click += new System.EventHandler(this.TsbSelectAllAttributesClick);
+            // 
+            // tsbShowSelectedOnly
+            // 
+            this.tsbShowSelectedOnly.CheckOnClick = true;
+            this.tsbShowSelectedOnly.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbShowSelectedOnly.Name = "tsbShowSelectedOnly";
+            this.tsbShowSelectedOnly.Size = new System.Drawing.Size(95, 22);
+            this.tsbShowSelectedOnly.Text = "Show selected";
+            this.tsbShowSelectedOnly.ToolTipText = "Displays only the attributes selected so far, across all tables and all previous s" +
+    "elections.";
+            this.tsbShowSelectedOnly.Click += new System.EventHandler(this.TsbShowSelectedOnlyClick);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tslFilter
+            // 
+            this.tslFilter.Name = "tslFilter";
+            this.tslFilter.Size = new System.Drawing.Size(36, 22);
+            this.tslFilter.Text = "Filter:";
+            // 
+            // tstbFilter
+            // 
+            this.tstbFilter.Name = "tstbFilter";
+            this.tstbFilter.Size = new System.Drawing.Size(180, 25);
+            this.tstbFilter.ToolTipText = "Type one or more terms (separated by space, comma or semicolon) to filter attribut" +
+    "e display names, attribute logical names and table logical names.";
+            this.tstbFilter.TextChanged += new System.EventHandler(this.TstbFilterTextChanged);
+            // 
             // lvAttributes
             // 
             this.lvAttributes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -282,11 +376,13 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lvAttributes.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader2,
-            this.columnHeader1});
+            this.columnHeader1,
+            this.columnHeaderEntity});
             this.lvAttributes.FullRowSelect = true;
-            this.lvAttributes.Location = new System.Drawing.Point(6, 44);
+            this.lvAttributes.HideSelection = false;
+            this.lvAttributes.Location = new System.Drawing.Point(6, 72);
             this.lvAttributes.Name = "lvAttributes";
-            this.lvAttributes.Size = new System.Drawing.Size(545, 436);
+            this.lvAttributes.Size = new System.Drawing.Size(481, 408);
             this.lvAttributes.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.lvAttributes.TabIndex = 2;
             this.lvAttributes.UseCompatibleStateImageBehavior = false;
@@ -296,12 +392,17 @@
             // columnHeader2
             // 
             this.columnHeader2.Text = "Attribute Display Name";
-            this.columnHeader2.Width = 200;
+            this.columnHeader2.Width = 170;
             // 
             // columnHeader1
             // 
             this.columnHeader1.Text = "Attribute Logical Name";
-            this.columnHeader1.Width = 200;
+            this.columnHeader1.Width = 170;
+            // 
+            // columnHeaderEntity
+            // 
+            this.columnHeaderEntity.Text = "Table Logical Name";
+            this.columnHeaderEntity.Width = 135;
             // 
             // gbEntities
             // 
@@ -313,7 +414,7 @@
             this.gbEntities.Enabled = false;
             this.gbEntities.Location = new System.Drawing.Point(10, 19);
             this.gbEntities.Name = "gbEntities";
-            this.gbEntities.Size = new System.Drawing.Size(326, 486);
+            this.gbEntities.Size = new System.Drawing.Size(390, 486);
             this.gbEntities.TabIndex = 89;
             this.gbEntities.TabStop = false;
             this.gbEntities.Text = "Entities";
@@ -322,10 +423,11 @@
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnAddEntity,
-            this.btnRemoveEntity});
+            this.btnRemoveEntity,
+            this.tsbSelectAllTables});
             this.toolStrip1.Location = new System.Drawing.Point(3, 16);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(320, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(384, 25);
             this.toolStrip1.TabIndex = 83;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -347,6 +449,16 @@
             this.btnRemoveEntity.Text = "Remove selected entities";
             this.btnRemoveEntity.Click += new System.EventHandler(this.PbRemoveEntityClick);
             // 
+            // tsbSelectAllTables
+            // 
+            this.tsbSelectAllTables.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsbSelectAllTables.Name = "tsbSelectAllTables";
+            this.tsbSelectAllTables.Size = new System.Drawing.Size(70, 22);
+            this.tsbSelectAllTables.Text = "Select All";
+            this.tsbSelectAllTables.ToolTipText = "Selects every table, so that all tables and their audited columns are displayed on" +
+    " the right. Click again to clear the selection.";
+            this.tsbSelectAllTables.Click += new System.EventHandler(this.TsbSelectAllTablesClick);
+            // 
             // lvEntities
             // 
             this.lvEntities.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -358,7 +470,7 @@
             this.lvEntities.HideSelection = false;
             this.lvEntities.Location = new System.Drawing.Point(6, 44);
             this.lvEntities.Name = "lvEntities";
-            this.lvEntities.Size = new System.Drawing.Size(314, 436);
+            this.lvEntities.Size = new System.Drawing.Size(378, 436);
             this.lvEntities.Sorting = System.Windows.Forms.SortOrder.Ascending;
             this.lvEntities.TabIndex = 79;
             this.lvEntities.UseCompatibleStateImageBehavior = false;
@@ -369,12 +481,12 @@
             // columnHeader4
             // 
             this.columnHeader4.Text = "Display name";
-            this.columnHeader4.Width = 156;
+            this.columnHeader4.Width = 200;
             // 
             // columnHeader7
             // 
             this.columnHeader7.Text = "Schema name";
-            this.columnHeader7.Width = 130;
+            this.columnHeader7.Width = 170;
             // 
             // statusImageList
             // 
@@ -415,6 +527,27 @@
             this.lblUserLabel.TabIndex = 2;
             this.lblUserLabel.Text = "User Access audit is currently";
             // 
+            // lblRetentionLabel
+            // 
+            this.lblRetentionLabel.AutoSize = true;
+            this.lblRetentionLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRetentionLabel.Location = new System.Drawing.Point(6, 46);
+            this.lblRetentionLabel.Name = "lblRetentionLabel";
+            this.lblRetentionLabel.Size = new System.Drawing.Size(211, 24);
+            this.lblRetentionLabel.TabIndex = 4;
+            this.lblRetentionLabel.Text = "Audit retention period is";
+            // 
+            // lblRetentionStatus
+            // 
+            this.lblRetentionStatus.AutoSize = true;
+            this.lblRetentionStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRetentionStatus.ForeColor = System.Drawing.Color.Black;
+            this.lblRetentionStatus.Location = new System.Drawing.Point(223, 46);
+            this.lblRetentionStatus.Name = "lblRetentionStatus";
+            this.lblRetentionStatus.Size = new System.Drawing.Size(42, 24);
+            this.lblRetentionStatus.TabIndex = 5;
+            this.lblRetentionStatus.Text = "N/A";
+            // 
             // MainControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -433,6 +566,8 @@
             this.gbAttributes.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
+            this.toolStrip3.ResumeLayout(false);
+            this.toolStrip3.PerformLayout();
             this.gbEntities.ResumeLayout(false);
             this.gbEntities.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -463,9 +598,17 @@
         private System.Windows.Forms.ListView lvAttributes;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.ColumnHeader columnHeaderEntity;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton btnAddAttribute;
         private System.Windows.Forms.ToolStripButton btnRemoveAttribute;
+        private System.Windows.Forms.ToolStrip toolStrip3;
+        private System.Windows.Forms.ToolStripButton tsbSelectAllAttributes;
+        private System.Windows.Forms.ToolStripButton tsbShowSelectedOnly;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripLabel tslFilter;
+        private System.Windows.Forms.ToolStripTextBox tstbFilter;
+        private System.Windows.Forms.ToolStripButton tsbSelectAllTables;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton btnAddEntity;
         private System.Windows.Forms.ToolStripButton btnRemoveEntity;
@@ -475,8 +618,12 @@
         private System.Windows.Forms.ToolStripButton tsbExportExcel;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton tsbApplyChanges;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripButton tsbAuditCleanup;
         private System.Windows.Forms.ToolStripButton tsbChangeUserAccessAudit;
         private System.Windows.Forms.Label lblUserStatus;
         private System.Windows.Forms.Label lblUserLabel;
+        private System.Windows.Forms.Label lblRetentionStatus;
+        private System.Windows.Forms.Label lblRetentionLabel;
     }
 }

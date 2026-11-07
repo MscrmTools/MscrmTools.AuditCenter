@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -76,6 +76,12 @@
     <Compile Include="Forms\AttributePicker.Designer.cs">
       <DependentUpon>AttributePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\AuditCleanupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AuditCleanupForm.Designer.cs">
+      <DependentUpon>AuditCleanupForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\EntityPicker.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,6 +108,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Forms\AttributePicker.resx">
       <DependentUpon>AttributePicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AuditCleanupForm.resx">
+      <DependentUpon>AuditCleanupForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\EntityPicker.resx">
       <DependentUpon>EntityPicker.cs</DependentUpon>
@@ -141,9 +150,15 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>echo f | xcopy /y /f $(TargetPath) $(TargetDir)Plugins\$(TargetFileName)</PostBuildEvent>
-  </PropertyGroup>
+
+  <Target Name="CopyPluginToPluginsFolder" AfterTargets="Build">
+    <MakeDir Directories="$(TargetDir)Plugins" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(TargetDir)Plugins" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <Copy SourceFiles="$(TargetDir)$(TargetFileName).config" DestinationFolder="$(TargetDir)Plugins" Condition="Exists('$(TargetDir)$(TargetFileName).config')" />
+  </Target>
+
+
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
