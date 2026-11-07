@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.ServiceModel;
 using System.Windows.Forms;
 using XrmToolBox.Extensibility;
 using XrmToolBox.Extensibility.Interfaces;
@@ -140,11 +141,25 @@ namespace MsCrmTools.AuditCenter
 
                     bw.ReportProgress(0, "Retrieving system audit status...");
 
-                    var orgs = Service.RetrieveMultiple(new QueryExpression
+                    EntityCollection orgs;
+
+                    try
                     {
-                        EntityName = "organization",
-                        ColumnSet = new ColumnSet(new[] { "isauditenabled", "isuseraccessauditenabled" })
-                    });
+                        orgs = Service.RetrieveMultiple(new QueryExpression
+                        {
+                            EntityName = "organization",
+                            ColumnSet = new ColumnSet(new[] { "isauditenabled", "isuseraccessauditenabled", "auditretentionperiodv2", "auditretentionperiod" })
+                        });
+                    }
+                    catch (FaultException<OrganizationServiceFault>)
+                    {
+                        // Retention period columns are not available on every organization version
+                        orgs = Service.RetrieveMultiple(new QueryExpression
+                        {
+                            EntityName = "organization",
+                            ColumnSet = new ColumnSet(new[] { "isauditenabled", "isuseraccessauditenabled" })
+                        });
+                    }
 
                     e.Result = orgs[0];
                 },
@@ -169,6 +184,8 @@ namespace MsCrmTools.AuditCenter
                         lblUserStatus.ForeColor = isUserAccessAuditEnabled ? Color.Green : Color.Red;
                         tsbChangeUserAccessAudit.Image = isUserAccessAuditEnabled ? statusImageList.Images[1] : statusImageList.Images[0];
                         tsbChangeUserAccessAudit.Text = isUserAccessAuditEnabled ? "Deactivate user access audit" : "Activate user access audit";
+
+                        lblRetentionStatus.Text = GetRetentionPeriodDescription(settings);
 
                         try
                         {
@@ -382,6 +399,32 @@ namespace MsCrmTools.AuditCenter
         #endregion Add/Remove Entities/Attributes
 
         #region Global Audit settings
+
+        /// <summary>
+        /// Builds a readable description of the audit retention period defined on the organization
+        /// </summary>
+        /// <param name="organization">Organization record holding audit settings</param>
+        /// <returns>Retention period description</returns>
+        private static string GetRetentionPeriodDescription(Entity organization)
+        {
+            var retentionPeriod = organization.Contains("auditretentionperiodv2")
+                ? organization.GetAttributeValue<int>("auditretentionperiodv2")
+                : (organization.Contains("auditretentionperiod")
+                    ? organization.GetAttributeValue<int>("auditretentionperiod")
+                    : (int?)null);
+
+            if (retentionPeriod == null)
+            {
+                return "N/A";
+            }
+
+            if (retentionPeriod.Value < 0)
+            {
+                return "Forever";
+            }
+
+            return retentionPeriod.Value == 1 ? "1 day" : $"{retentionPeriod.Value} days";
+        }
 
         private void TsbChangeSystemAuditStatusClick(object sender, EventArgs e)
         {
